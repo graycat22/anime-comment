@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import {
   Navbar,
-  MobileNav,
   Typography,
   Button,
   IconButton,
@@ -31,8 +30,8 @@ const Home = () => {
         className="flex items-center gap-x-2 p-1 font-medium"
         placeholder=""
       >
-        <a href="#" className="flex items-center">
-          Pages
+        <a href="#" className="flex items-center text-stone-900">
+          今期アニメ
         </a>
       </Typography>
       <Typography
@@ -42,8 +41,8 @@ const Home = () => {
         className="flex items-center gap-x-2 p-1 font-medium"
         placeholder=""
       >
-        <a href="#" className="flex items-center">
-          Account
+        <a href="#" className="flex items-center text-stone-900">
+          前期アニメ
         </a>
       </Typography>
       <Typography
@@ -53,8 +52,8 @@ const Home = () => {
         className="flex items-center gap-x-2 p-1 font-medium"
         placeholder=""
       >
-        <a href="#" className="flex items-center">
-          Blocks
+        <a href="#" className="flex items-center text-stone-900">
+          過去ログ
         </a>
       </Typography>
       <Typography
@@ -64,8 +63,8 @@ const Home = () => {
         className="flex items-center gap-x-2 p-1 font-medium"
         placeholder=""
       >
-        <a href="#" className="flex items-center">
-          Docs
+        <a href="#" className="flex items-center text-stone-900">
+          ♨️スレッド
         </a>
       </Typography>
     </ul>
@@ -73,45 +72,50 @@ const Home = () => {
 
   const handleOpenNav = () => {
     if (window.innerWidth >= 960) {
+      return;
     } else {
       setOpenNav(!openNav);
     }
   };
 
   return (
-    <main className="scroll-none">
+    <main>
       <div>
         <Navbar className="mx-auto py-2 lg:py-4" placeholder="">
           <div
-            className="container mx-auto flex items-center justify-between text-blue-gray-900 cursor-pointer"
+            className="container mx-auto flex items-center justify-between text-blue-gray-900 cursor-pointer lg:cursor-default"
             onClick={handleOpenNav}
           >
             <Typography
               as="a"
-              href="#"
+              href="/"
               className="mr-4 cursor-pointer py-1.5 font-medium"
               placeholder=""
             >
               <Image width={300} height={200} alt="" src="/anikome.webp" />
             </Typography>
             <div className="hidden lg:block">{navList}</div>
-            <div className="flex items-center gap-x-1">
-              <Button
-                variant="text"
-                size="sm"
-                placeholder=""
-                className="hidden w-24 bg-gray-200 rounded-md lg:inline-block"
-              >
-                <span>ログイン</span>
-              </Button>
-              <Button
-                variant="gradient"
-                size="sm"
-                placeholder=""
-                className="hidden w-24 bg-gray-200 rounded-md lg:inline-block"
-              >
-                <span>アカウント作成</span>
-              </Button>
+            <div className="flex items-center gap-x-2">
+              <Link href="/mypage" className="w-full">
+                <Button
+                  variant="text"
+                  size="sm"
+                  placeholder=""
+                  className="hidden w-24 text-stone-900 bg-gray-200 rounded-md lg:inline-block"
+                >
+                  <span>ログイン</span>
+                </Button>
+              </Link>
+              <Link href="/mypage" className="w-full">
+                <Button
+                  variant="gradient"
+                  size="sm"
+                  placeholder=""
+                  className="hidden w-[120px] text-stone-900 bg-gray-200 rounded-md lg:inline-block"
+                >
+                  <span>サインアップ</span>
+                </Button>
+              </Link>
             </div>
             <IconButton
               placeholder=""
@@ -123,7 +127,7 @@ const Home = () => {
               {openNav ? (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
+                  fill="blue"
                   className="h-6 w-6"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -139,7 +143,7 @@ const Home = () => {
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"
-                  fill="none"
+                  fill="black"
                   stroke="currentColor"
                   strokeWidth={2}
                 >
@@ -156,10 +160,10 @@ const Home = () => {
             <nav className="duration-500 ease-in-out">
               <div className="container mx-auto">
                 {navList}
-                <div className="flex items-center gap-x-1">
+                <div className="flex items-center gap-x-2">
                   <Link href="/mypage" className="w-full">
                     <Button
-                      className="w-full border-2 rounded-md"
+                      className="w-full border-2 rounded-md text-stone-900"
                       fullWidth
                       variant="text"
                       size="sm"
@@ -170,13 +174,13 @@ const Home = () => {
                   </Link>
                   <Link href="/mypage" className="w-full">
                     <Button
-                      className="w-full border-2 rounded-md"
+                      className="w-full border-2 rounded-md text-stone-900"
                       fullWidth
                       variant="text"
                       size="sm"
                       placeholder=""
                     >
-                      <span>アカウント作成</span>
+                      <span>サインアップ</span>
                     </Button>
                   </Link>
                 </div>
@@ -185,6 +189,7 @@ const Home = () => {
           )}
         </Navbar>
       </div>
+      {openNav && <div className="w-full h-2 border-b-2 my-4"></div>}
       <ThreadsList />
     </main>
   );
