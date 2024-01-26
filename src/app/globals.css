@@ -12,3 +12,14 @@
 ::-webkit-scrollbar-thumb {
   background-color: #93c5fd;
 }
+
+.wavy-border {
+  background-size: 100% 20px; /* ウェーブの高さを設定 */
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 10px,
+    #ec7871 10px,
+    #ec7871 30px
+  ); /* ウェーブのパターンを設定 */
+}
