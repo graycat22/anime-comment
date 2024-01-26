@@ -7,7 +7,7 @@ const ThreadsList = () => {
       id: 1,
       image: "/pokemon.png",
       alt: "",
-      description: "ポケモン",
+      description: "ポケモン 第一話",
       number: "",
       url: "",
     },
@@ -21,7 +21,7 @@ const ThreadsList = () => {
     },
     {
       id: 3,
-      image: "/pokemon.png",
+      image: "",
       alt: "",
       description: "",
       number: "",
@@ -62,18 +62,25 @@ const ThreadsList = () => {
           <Link
             href={`/threads/${thread.id}`}
             key={index}
-            className="flex mx-10 my-5 cursor-pointer relative"
+            className="flex mx-3 sm:mx-10 my-5 cursor-pointer relative"
           >
-            <Image
-              width={300}
-              height={200}
-              alt={thread.alt}
-              src={thread.image}
-              className="relative"
-            />
-            <p className="absolute top-0 left-0 hidden sm:inline-block bg-opacity-75 bg-gray-800 p-2 text-white">
+            {thread.image ? (
+              <Image
+                width={300}
+                height={200}
+                alt={thread.alt}
+                src={thread.image}
+                className="relative ring-2 ring-pink-500/90 rounded-sm"
+              />
+            ) : (
+              <div className="flex w-[300px] h-[168px] bg-stone-400 relative ring-2 ring-pink-500/90 rounded-sm">
+                <p className="m-auto italic text-stone-100">N/A</p>
+              </div>
+            )}
+            <p className="absolute top-0 left-0 sm:hidden bg-opacity-75 bg-gray-800 p-2 text-white">
               {thread.description}
             </p>
+            <p className="hidden sm:inline-block">{thread.description}</p>
           </Link>
         ))}
       </div>

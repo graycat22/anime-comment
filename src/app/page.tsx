@@ -1,12 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Navbar,
-  Typography,
-  Button,
-  IconButton,
-} from "@material-tailwind/react";
+import { Navbar, Typography, Button } from "@material-tailwind/react";
 import Image from "next/image";
 import Link from "next/link";
 import ThreadsList from "./threadsList";
@@ -22,7 +17,7 @@ const Home = () => {
   }, []);
 
   const navList = (
-    <ul className="mt-2 mb-4 flex flex-col gap-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
+    <ul className="mt-2 mb-4 mx-2 flex flex-col gap-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
       <Typography
         as="li"
         variant="small"
@@ -117,18 +112,14 @@ const Home = () => {
                 </Button>
               </Link>
             </div>
-            <IconButton
-              placeholder=""
-              variant="text"
-              className="ml-auto h-6 w-6 text-inherit hover:bg-transparent focus:bg-transparent active:bg-transparent lg:hidden"
-              ripple={false}
+            <div
+              className="ml-auto mr-3 h-6 w-6 text-inherit hover:bg-transparent focus:bg-transparent active:bg-transparent lg:hidden"
               onClick={() => setOpenNav(!openNav)}
             >
               {openNav ? (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  fill="blue"
-                  className="h-6 w-6"
+                  className="h-6 w-6 text-stone-900"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   strokeWidth={2}
@@ -142,7 +133,7 @@ const Home = () => {
               ) : (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
+                  className="h-6 w-6 text-stone-900"
                   fill="black"
                   stroke="currentColor"
                   strokeWidth={2}
@@ -154,13 +145,13 @@ const Home = () => {
                   />
                 </svg>
               )}
-            </IconButton>
+            </div>
           </div>
           {openNav && (
             <nav className="duration-500 ease-in-out">
               <div className="container mx-auto">
                 {navList}
-                <div className="flex items-center gap-x-2">
+                <div className="flex items-center gap-x-2 mx-2">
                   <Link href="/mypage" className="w-full">
                     <Button
                       className="w-full border-2 rounded-md text-stone-900"
