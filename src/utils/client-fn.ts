@@ -1,3 +1,5 @@
+export const access_token = "amksM34Jh76lsXGuXlxxl_bfkzeb8pYgCaJ04n6y-9M";
+
 export const recursiveGetWorks: (
   nextPage: number,
   accessToken: string
@@ -17,4 +19,15 @@ export const recursiveGetWorks: (
   }
 
   return result;
+};
+
+// 日付で並び替える関数
+const sortDatesByOldest = (dateStrings: string[]): string[] => {
+  const parseDate = (dateString: string) => new Date(dateString);
+
+  const sortedDates = dateStrings
+    .slice()
+    .sort((a, b) => parseDate(a).getTime() - parseDate(b).getTime());
+
+  return sortedDates;
 };
