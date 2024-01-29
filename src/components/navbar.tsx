@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const Navibar = () => {
+const Navibar = ({ color }: { color: string }) => {
   const [openNav, setOpenNav] = useState<boolean>(false);
 
   useEffect(() => {
@@ -19,7 +19,7 @@ const Navibar = () => {
     <ul className="mt-2 mb-4 mx-2 flex flex-col gap-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
       <Typography
         as="li"
-        variant="small"
+        variant="h2"
         color="blue-gray"
         className="flex items-center gap-x-2 p-1 font-medium"
         placeholder=""
@@ -30,7 +30,7 @@ const Navibar = () => {
       </Typography>
       <Typography
         as="li"
-        variant="small"
+        variant="h2"
         color="blue-gray"
         className="flex items-center gap-x-2 p-1 font-medium"
         placeholder=""
@@ -41,7 +41,7 @@ const Navibar = () => {
       </Typography>
       <Typography
         as="li"
-        variant="small"
+        variant="h2"
         color="blue-gray"
         className="flex items-center gap-x-2 p-1 font-medium"
         placeholder=""
@@ -52,7 +52,7 @@ const Navibar = () => {
       </Typography>
       <Typography
         as="li"
-        variant="small"
+        variant="h2"
         color="blue-gray"
         className="flex items-center gap-x-2 p-1 font-medium"
         placeholder=""
@@ -87,6 +87,9 @@ const Navibar = () => {
             <Image width={300} height={200} alt="" src="/anikome.webp" />
           </Typography>
           <div className="hidden lg:block">{navList}</div>
+          <div className="mx-auto pl-12 md:pl-20 lg:hidden text-stone-900">
+            アニコメ
+          </div>
           <div className="flex items-center gap-x-2">
             <Link href="/mypage" className="w-full">
               <Button
@@ -176,7 +179,9 @@ const Navibar = () => {
           </nav>
         )}
       </Navbar>
-      {openNav && <div className="w-full h-2 wavy-border my-4"></div>}
+      {openNav && (
+        <div className={`w-full h-2 wavy-border-${color} my-4`}></div>
+      )}
     </div>
   );
 };

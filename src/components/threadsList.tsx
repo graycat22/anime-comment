@@ -17,17 +17,20 @@ const ThreadsList = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const works = await recursiveGetWorks(1, access_token);
-
-        //* データ整形
-
-        setAllAnime(works);
-        setCurrentAllAnime(works);
+        if (sessionStorage.getItem("allAnime")) {
+          // sessionStorageにallAnimeがある場合はそれをステートにセット
+          setAllAnime(JSON.parse(sessionStorage.getItem("allAnime")!));
+          setCurrentAllAnime(JSON.parse(sessionStorage.getItem("allAnime")!));
+        } else {
+          const works = await recursiveGetWorks(1, access_token);
+          setAllAnime(works);
+          setCurrentAllAnime(works);
+          sessionStorage.setItem("allAnime", JSON.stringify(works));
+        }
       } catch (error) {
         console.log("エラーが発生しました", error);
       }
     };
-
     fetchData();
   }, []);
 
@@ -172,37 +175,59 @@ const ThreadsList = () => {
             </div>
           </div>
           {currentAllAnime.map((anime, index) => (
-            <Link
-              href={`/works/${anime.id}`}
-              key={index}
-              className="flex justify-center mx-3 my-5 cursor-pointer"
-            >
-              <div className="relative flex">
-                {anime.images ? (
-                  <Image
-                    width={300}
-                    height={200}
-                    alt=""
-                    src="/pokemon.png"
-                    className="ring-2 ring-[#eC7871] rounded-sm"
-                  />
-                ) : (
-                  <div className="flex relative w-[300px] h-[168px] bg-stone-400/80 ring-2 ring-[#6C7871] rounded-sm">
-                    <p className="m-auto italic text-stone-100">N/A</p>
-                    <div className="absolute bottom-0 w-full flex justify-between px-1 text-sm">
-                      <p className="">ID: {anime.id}</p>
-                      <p className="">Status: {anime.status.kind}</p>
+            <div key={index} className="flex justify-center">
+              <Link
+                href={`/works/${anime.id}`}
+                className="flex justify-center mx-3 my-5 cursor-pointer"
+              >
+                <div className="relative flex">
+                  {anime.images ? (
+                    <Image
+                      width={300}
+                      height={200}
+                      alt=""
+                      src="/pokemon.png"
+                      className="ring-2 ring-[#eC7871] rounded-sm"
+                    />
+                  ) : (
+                    <div className="flex relative w-[300px] h-[168px] bg-stone-400/80 ring-2 ring-[#6C7871] rounded-sm">
+                      <p className="m-auto italic text-stone-100">N/A</p>
+                      <div className="absolute bottom-0 w-full flex justify-between px-1 text-sm">
+                        <p className="">ID: {anime.id}</p>
+                        <p className="">Status: {anime.status.kind}</p>
+                      </div>
                     </div>
+                  )}
+
+                  <p className="absolute top-0 left-0 w-[300px] bg-opacity-75 bg-gray-800 p-2 text-white">
+                    {anime.title}
+                  </p>
+                  <div className="relative flex flex-col md:w-[250px] lg:w-[350px] h-full">
+                    <p className="hidden md:inline-block px-3">
+                      ( XX コメント)
+                    </p>
+                    <p className="hidden md:inline-block px-3">
+                      全 {anime.episodes_count} 話
+                    </p>
+                    <p className="hidden md:inline-block px-3">
+                      放送時期 : {anime.season_name_text}
+                    </p>
+                    <p className="hidden md:inline-block absolute bottom-0 px-3">
+                      ID : {anime.id}
+                    </p>
+                    {!animeStatus && (
+                      <p className="hidden md:inline-block absolute bottom-0 right-0 px-3">
+                        {anime.status.kind === "watching" && "視聴中"}
+                        {anime.status.kind === "wanna_watch" && "見たい"}
+                        {anime.status.kind === "watched" && "見た"}
+                        {anime.status.kind === "stop_watching" && "視聴中止"}
+                        {anime.status.kind === "on_hold" && "一時中断"}
+                      </p>
+                    )}
                   </div>
-                )}
-                <p className="absolute top-0 left-0 w-full md:hidden bg-opacity-75 bg-gray-800 p-2 text-white">
-                  {anime.title}
-                </p>
-                <p className="hidden md:inline-block w-[200px]">
-                  {anime.title}
-                </p>
-              </div>
-            </Link>
+                </div>
+              </Link>
+            </div>
           ))}
         </div>
 
@@ -211,6 +236,12 @@ const ThreadsList = () => {
           <div>あかん</div>
           <div>あかん</div>
         </div>
+      </div>
+      <div className="fixed bottom-3 left-3 z-10 px-2 py-1 bg-[#ff7a7a]/80 rounded-md text-stone-900">
+        作品数 : {allAnime.length}
+      </div>
+      <div className="fixed bottom-3 right-3 z-10 px-2 py-1 bg-[#ff7a7a]/80 rounded-md text-stone-900">
+        トップへ戻る
       </div>
     </>
   );
