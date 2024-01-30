@@ -72,7 +72,7 @@ const Navibar = ({ color }: { color: string }) => {
     }
   };
   return (
-    <div>
+    <div id="navibar">
       <Navbar className="mx-auto py-2 lg:py-4" placeholder="">
         <div
           className="container mx-auto flex items-center justify-between text-blue-gray-900 cursor-pointer lg:cursor-default"
