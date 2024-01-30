@@ -160,7 +160,7 @@ const ThreadsList = () => {
               <select
                 value={animeStatus}
                 onChange={handleSelectStatus}
-                className="py-1 px-2 border-2 rounded-md focus:outline-none focus:border-indigo-300 bg-pink-100 text-pink-700"
+                className="py-1 px-2 border-2 rounded-md focus:outline-none focus:border-indigo-300 text-red-500"
               >
                 <option value="all" className="px-2 border-2 rounded-md">
                   すべて
@@ -216,7 +216,7 @@ const ThreadsList = () => {
                       </div>
                     )}
 
-                    <p className="absolute top-0 left-0 w-[300px] bg-opacity-75 bg-gray-800 p-2 text-white">
+                    <p className="absolute top-0 left-0 w-full md:w-[300px] bg-opacity-75 bg-gray-800 p-2 text-white">
                       {anime.title}
                     </p>
                     <div className="relative flex flex-col md:w-[250px] lg:w-[350px] h-full">
