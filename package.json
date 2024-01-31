@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@material-tailwind/react": "^2.1.8",
+    "@supabase/ssr": "^0.0.10",
+    "@supabase/supabase-js": "^2.39.3",
     "next": "14.1.0",
     "react": "^18",
     "react-dom": "^18"

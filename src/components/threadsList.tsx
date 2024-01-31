@@ -1,6 +1,6 @@
 "use client";
 
-import { access_token, recursiveGetWorks } from "@/utils/client-fn";
+import { access_token, recursiveGetWorks } from "@/utils/functions-cs";
 import { StatusType } from "@/utils/type";
 import Image from "next/image";
 import Link from "next/link";

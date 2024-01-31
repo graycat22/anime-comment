@@ -1,6 +1,6 @@
 "use client";
 
-import { access_token } from "@/utils/client-fn";
+import { access_token } from "@/utils/functions-cs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
