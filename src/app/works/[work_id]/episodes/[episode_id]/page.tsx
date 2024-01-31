@@ -124,8 +124,6 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
               </Link>
             )}
           </>
-          <p></p>
-          <p></p>
         </div> */}
 
       <div className="flex flex-col mx-auto sm:w-4/5 md:w-2/3 lg:w-1/2">
