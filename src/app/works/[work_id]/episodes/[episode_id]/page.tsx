@@ -1,20 +1,28 @@
 "use client";
 
+import DeleteDialog from "@/components/delete_dialog";
 import { postComment } from "@/utils/actions";
-import { access_token } from "@/utils/functions-cs";
+import {
+  access_token,
+  generateRandomNumber,
+  pressKeyDown,
+  resizeTextarea,
+} from "@/utils/functions-cs";
 import { supabase_br } from "@/utils/supabase-cs";
 import { useEffect, useRef, useState } from "react";
 import { useFormState } from "react-dom";
 
-const initialState = {
-  message: "",
-};
+const initialState = { message: "" };
 
 const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
   const [state, action] = useFormState(postComment, initialState);
   const [episode, setEpisode] = useState<any>([]);
   const [stickyBar, setStickyBar] = useState<boolean>(false);
   const [comments, setComments] = useState<any>([]);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
+  const [replyTo, setReplyTo] = useState<string>("");
+  const [deleteId, setDeleteId] = useState<string>("");
+  const [isRevalidate, setIsRevalidate] = useState<number>(0);
   // 直接 DOM 操作
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -37,10 +45,14 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
   console.log(episode);
   console.log("state", state);
 
+  //* コメントを取得する
   useEffect(() => {
     const fetchComment = async () => {
       const supabase = supabase_br;
-      const { data, error } = await supabase.from("Comments").select();
+      const { data, error } = await supabase
+        .from("Comments")
+        .select()
+        .eq("episode_id", params.episode_id);
       if (error) return console.log(error);
       console.log(data);
       setComments(data);
@@ -60,10 +72,13 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
           });
         }
       }, 100);
+
+      resize();
       return () => clearTimeout(timeout);
     }
-  }, [state.message]);
+  }, [state.message, isRevalidate]);
 
+  // 送信したら最下部へスクロール
   useEffect(() => {
     const handleScroll = () => {
       const navibar = document.getElementById("navibar");
@@ -88,12 +103,38 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []); // 空の dependency array は最初のマウント時のみ実行する
+  }, []);
+
+  const clickDeleteButton = (commentId: string) => {
+    setOpenDeleteDialog(!openDeleteDialog);
+    setDeleteId(commentId);
+  };
+
+  const clickReplyButton = (replyId: string) => {
+    console.log("replId", replyId);
+    console.log("replyTo", replyTo);
+
+    if (replyId === replyTo) {
+      setReplyTo("");
+    } else {
+      setReplyTo(replyId);
+    }
+  };
+
+  const handleScrollToComment = (commentId: string) => {
+    const element = document.getElementById(commentId.slice(0, 8));
+
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
+
+  console.log("revalidate", isRevalidate);
 
   return (
     <div>
       <div
-        className={`sticky top-0 z-10 flex justify-center ${
+        className={`sticky top-0 z-[1] flex justify-center ${
           stickyBar && "bg-gradient-to-b from-black/35 to-transparent"
         }`}
       >
@@ -127,22 +168,27 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
         </div> */}
 
       <div className="flex flex-col mx-auto sm:w-4/5 md:w-2/3 lg:w-1/2">
-        <div className="mx-3 mb-16">
+        <div className="mx-3 mb-[72px]">
           {comments.map((comment: any, index: number) => {
             const contentHeight = comment.content.split("\n").length;
             return (
               <div
+                id={comment.id.slice(0, 8)}
                 key={comment.id}
                 className={`my-2 ${
                   index !== comments.length - 1 && "border-b-2"
-                }`}
+                } ${replyTo === comment.id && "border-red-300"}`}
               >
                 <div className="w-full">
                   <div className="flex justify-between">
                     <div className="flex gap-2 items-center text-sm">
-                      <div className="flex">
+                      <div
+                        className={`flex ${
+                          replyTo === comment.id && "text-red-500/90"
+                        }`}
+                      >
                         {comment.reply_to && (
-                          <p>ID: {comment.reply_to} ⇐ &nbsp; </p>
+                          <p>ID: {comment.reply_to.slice(0, 8)} ⇐ &nbsp; </p>
                         )}
                         <p>ID: {comment.id.slice(0, 8)}</p>
                       </div>
@@ -197,25 +243,35 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
                           </div>
                           <>
                             {comment.user === "あなた" ? (
-                              <button className="w-5">
+                              <button
+                                onClick={() => clickDeleteButton(comment.id)}
+                                className="w-5"
+                              >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
                                   viewBox="0 0 512 512"
                                 >
                                   <path
-                                    fill="gray"
+                                    fill="brown"
                                     d="M176 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64c-35.3 0-64 28.7-64 64H24c-13.3 0-24 10.7-24 24s10.7 24 24 24H64v56H24c-13.3 0-24 10.7-24 24s10.7 24 24 24H64v56H24c-13.3 0-24 10.7-24 24s10.7 24 24 24H64c0 35.3 28.7 64 64 64v40c0 13.3 10.7 24 24 24s24-10.7 24-24V448h56v40c0 13.3 10.7 24 24 24s24-10.7 24-24V448h56v40c0 13.3 10.7 24 24 24s24-10.7 24-24V448c35.3 0 64-28.7 64-64h40c13.3 0 24-10.7 24-24s-10.7-24-24-24H448V280h40c13.3 0 24-10.7 24-24s-10.7-24-24-24H448V176h40c13.3 0 24-10.7 24-24s-10.7-24-24-24H448c0-35.3-28.7-64-64-64V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H280V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H176V24zM160 128H352c17.7 0 32 14.3 32 32V352c0 17.7-14.3 32-32 32H160c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32zm192 32H160V352H352V160z"
                                   />
                                 </svg>
                               </button>
                             ) : (
-                              <button className="w-5">
+                              <button
+                                onClick={() => clickReplyButton(comment.id)}
+                                className="w-5"
+                              >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
                                   viewBox="0 0 512 512"
                                 >
                                   <path
-                                    fill="gray"
+                                    fill={`${
+                                      replyTo === comment.id //!
+                                        ? "rgb(252, 105, 105)"
+                                        : "gray"
+                                    }`}
                                     d="M205 34.8c11.5 5.1 19 16.6 19 29.2v64H336c97.2 0 176 78.8 176 176c0 113.3-81.5 163.9-100.2 174.1c-2.5 1.4-5.3 1.9-8.1 1.9c-10.9 0-19.7-8.9-19.7-19.7c0-7.5 4.3-14.4 9.8-19.5c9.4-8.8 22.2-26.4 22.2-56.7c0-53-43-96-96-96H224v64c0 12.6-7.4 24.1-19 29.2s-25 3-34.4-5.4l-160-144C3.9 225.7 0 217.1 0 208s3.9-17.7 10.6-23.8l160-144c9.4-8.5 22.9-10.6 34.4-5.4z"
                                   />
                                 </svg>
@@ -239,10 +295,13 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
           className="fixed bottom-0 flex px-2 w-full sm:w-4/5 md:w-2/3 lg:w-1/2 bg-slate-200 rounded-t-lg"
         >
           <textarea
+            id="textarea"
             name="content"
             ref={textareaRef}
+            onInput={() => resizeTextarea("textarea")}
+            onKeyDown={pressKeyDown}
             placeholder="コメントする…"
-            className="w-full border-b-2 border-red-300 my-2 resize-none focus:outline-none bg-slate-200"
+            className="w-full border-b-2 border-red-300 mt-3 mb-2 resize-none focus:outline-none bg-slate-200"
           />
           <>
             <>
@@ -251,17 +310,49 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
               )}
             </>
             <input type="hidden" name="episode_id" value={episode.id} />
-            <input type="hidden" name="reply_to" value="13a3f5d7" />
+            <input type="hidden" name="reply_to" value={replyTo} />
           </>
-          <button type="submit" className="w-6 mx-3 my-auto">
+          <>
+            {replyTo && (
+              <span
+                onClick={() => handleScrollToComment(replyTo)}
+                className="absolute w-fit h-3 right-2 text-[12px] cursor-pointer text-stone-900 hover:text-stone-500"
+              >
+                {replyTo.slice(0, 8)} に返信中…
+              </span>
+            )}
+          </>
+          <button
+            id="submitButton"
+            type="submit"
+            className="w-6 mt-3 mx-3 py-auto transition-transform transform hover:translate-y-1"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-              <path d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480V396.4c0-4 1.5-7.8 4.2-10.7L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z" />
+              <path
+                fill="rgb(252 105 105)"
+                d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480V396.4c0-4 1.5-7.8 4.2-10.7L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"
+              />
             </svg>
           </button>
         </form>
       </div>
+      <>
+        {openDeleteDialog && (
+          <DeleteDialog
+            id={deleteId}
+            isOpen={openDeleteDialog}
+            onClose={() => setOpenDeleteDialog(false)}
+            revalidate={() => setIsRevalidate(generateRandomNumber())}
+          />
+        )}
+      </>
     </div>
   );
 };
 
 export default EpisodeComment;
+
+const resize = () => {
+  const $textarea = document.getElementById("textarea") as HTMLTextAreaElement;
+  $textarea.style.height = "50px";
+};

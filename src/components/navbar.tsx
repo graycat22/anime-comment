@@ -91,7 +91,7 @@ const Navibar = ({ color }: { color: string }) => {
             アニコメ
           </div>
           <div className="flex items-center gap-x-2">
-            <Link href="/mypage" className="w-full">
+            <Link href="/account?form=login" className="w-full">
               <Button
                 variant="text"
                 size="sm"
@@ -101,7 +101,7 @@ const Navibar = ({ color }: { color: string }) => {
                 <span>ログイン</span>
               </Button>
             </Link>
-            <Link href="/mypage" className="w-full">
+            <Link href="/account?form=signup" className="w-full">
               <Button
                 variant="gradient"
                 size="sm"
@@ -152,7 +152,7 @@ const Navibar = ({ color }: { color: string }) => {
             <div className="container mx-auto">
               {navList}
               <div className="flex items-center gap-x-2 mx-2">
-                <Link href="/mypage" className="w-full">
+                <Link href="/account?form=login" className="w-full">
                   <Button
                     className="w-full border-2 rounded-md text-stone-900"
                     fullWidth
@@ -163,7 +163,7 @@ const Navibar = ({ color }: { color: string }) => {
                     <span>ログイン</span>
                   </Button>
                 </Link>
-                <Link href="/mypage" className="w-full">
+                <Link href="/account?form=signup" className="w-full">
                   <Button
                     className="w-full border-2 rounded-md text-stone-900"
                     fullWidth
