@@ -1,10 +1,11 @@
 import LoginSignup from "@/components/login_signup";
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 
 const Login = () => {
   return (
-    <div>
+    <Suspense>
       <div className="flex">
         <Link href="/" className="w-full h-full">
           <Image width={300} height={200} alt="" src="/anikome.webp" />
@@ -22,7 +23,7 @@ const Login = () => {
         </div>
       </div>
       <LoginSignup />
-    </div>
+    </Suspense>
   );
 };
 
