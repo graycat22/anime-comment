@@ -1,7 +1,7 @@
 "use client";
 
 import Navibar from "@/components/navbar";
-import ThreadsList from "../components/threadsList";
+import ThreadsList from "../components/threads_list";
 
 const Home = () => {
   return (

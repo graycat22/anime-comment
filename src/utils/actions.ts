@@ -1,11 +1,11 @@
 "use server";
 
 import { generateRandomNumber } from "./functions-cs";
-import { supabase_sb } from "./supabase-ss";
+import { supabase_sa } from "./supabase-ss";
 
 type CommentType = { message: string };
 
-// コメント投稿
+//* コメント投稿 ////////////////////////////////////////////////
 export const postComment = async (
   currentState: CommentType,
   formData: FormData
@@ -22,7 +22,7 @@ export const postComment = async (
     return { message: `failed${generateRandomNumber()}` };
   }
 
-  const supabase = await supabase_sb();
+  const supabase = await supabase_sa();
   const { error } = await supabase.from("Comments").insert({
     user: "あなた",
     content: content.toString().trim(),
@@ -38,10 +38,10 @@ export const postComment = async (
   }
 };
 
-// コメント削除
+//* コメント削除 ////////////////////////////////////////////////
 export const deleteComment = async (commenId: string) => {
   console.log("commenetId", commenId);
-  const supabase = await supabase_sb();
+  const supabase = await supabase_sa();
   const { error } = await supabase.from("Comments").delete().eq("id", commenId);
   if (error) {
     return console.log("コメント削除に失敗しました");
@@ -50,7 +50,41 @@ export const deleteComment = async (commenId: string) => {
   }
 };
 
-// メアドでサインアップ
+//* セッションの有無でログイン状態かどうかを判定 /////////////////////////
+export const ListenToAuth = async () => {
+  const supabase = await supabase_sa();
+  const authListener = supabase.auth.onAuthStateChange((event, session) => {
+    console.log("event", event);
+    if (event === "SIGNED_IN") {
+      console.log("ログインしました");
+    }
+    if (event === "SIGNED_OUT") {
+      console.log("ログアウトしました");
+    }
+  });
+
+  return () => {
+    authListener.data.subscription.unsubscribe(); //* Unsubscribe when component unmounts
+  };
+};
+
+//* signUp か logIn を振り分ける。
+export const setupAccount = async (
+  query: "login" | "signup",
+  currentState: CommentType,
+  formData: FormData
+): Promise<CommentType> => {
+  console.log("saa", query, formData.get("email")?.toString());
+  if (query === "login") {
+    return logIn(currentState, formData);
+  } else if (query === "signup") {
+    return signUp(currentState, formData);
+  } else {
+    return { message: "failed!!" };
+  }
+};
+
+//* メアドでサインアップ ////////////////////////////////////////////////
 export const signUp = async (
   currentState: CommentType,
   formData: FormData
@@ -71,7 +105,7 @@ export const signUp = async (
     return { message: "パスワードは必須です" };
   }
 
-  const supabase = await supabase_sb();
+  const supabase = await supabase_sa();
   const { data, error } = await supabase.auth.signUp({
     email: email,
     password: password,
@@ -89,7 +123,7 @@ export const signUp = async (
   }
 };
 
-// メアドでログイン
+//* メアドでログイン ////////////////////////////////////////////////
 export const logIn = async (
   currentState: CommentType,
   formData: FormData
@@ -105,8 +139,8 @@ export const logIn = async (
     return { message: "パスワードは必須です" };
   }
 
-  const supabase = await supabase_sb();
-  const { data, error } = await supabase.auth.signUp({
+  const supabase = await supabase_sa();
+  const { error } = await supabase.auth.signInWithPassword({
     email: email,
     password: password,
   });
@@ -118,12 +152,19 @@ export const logIn = async (
   }
 };
 
-// ユーザー情報の変更
+//* ログアウト ////////////////////////////////////////////////
+// export const signOut = async () => {
+//   const supabase = await supabase_sa();
+//   const { error } = await supabase.auth.signOut();
+//   if (error) console.log("ログアウトできませんでした");
+// };
+
+//* ユーザー情報の変更 ////////////////////////////////////////////////
 export const updateUser = async (formData: FormData) => {
   const displayName = formData.get("display_name");
   const apiKey = formData.get("api_key")?.toString();
 
-  const supabase = await supabase_sb();
+  const supabase = await supabase_sa();
   const { error } = await supabase.auth.updateUser({
     data: { display_name: displayName, api_key: apiKey },
   });
@@ -135,9 +176,9 @@ export const updateUser = async (formData: FormData) => {
   }
 };
 
-// API キーを削除
+//* API キーを削除 ////////////////////////////////////////////////
 export const deleteApiKey = async () => {
-  const supabase = await supabase_sb();
+  const supabase = await supabase_sa();
   const { error } = await supabase.auth.updateUser({
     data: { api_key: null },
   });

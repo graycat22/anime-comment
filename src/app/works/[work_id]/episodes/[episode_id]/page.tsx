@@ -4,6 +4,7 @@ import DeleteDialog from "@/components/delete_dialog";
 import { postComment } from "@/utils/actions";
 import {
   access_token,
+  convertToJST,
   generateRandomNumber,
   pressKeyDown,
   resizeTextarea,
@@ -55,6 +56,7 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
         .eq("episode_id", params.episode_id);
       if (error) return console.log(error);
       console.log(data);
+      setReplyTo("");
       setComments(data);
     };
 
@@ -129,6 +131,11 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
     }
   };
 
+  const clickReplyId = (commentId: string) => {
+    handleScrollToComment(commentId);
+    setReplyTo(commentId);
+  };
+
   console.log("revalidate", isRevalidate);
 
   return (
@@ -188,12 +195,20 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
                         }`}
                       >
                         {comment.reply_to && (
-                          <p>ID: {comment.reply_to.slice(0, 8)} ⇐ &nbsp; </p>
+                          <p
+                            onClick={() => clickReplyId(comment.reply_to)}
+                            className="cursor-pointer hover:text-red-400"
+                          >
+                            ID: {comment.reply_to.slice(0, 8)} ⇐ &nbsp;{" "}
+                          </p>
                         )}
                         <p>ID: {comment.id.slice(0, 8)}</p>
                       </div>
                     </div>
-                    <p>{comment.user}</p>
+                    <div className="flex gap-2">
+                      <p>{convertToJST(comment.created_at)}</p>
+                      <p>{comment.user}</p>
+                    </div>
                   </div>
                   <div className="flex mb-2.5">
                     <p className="w-full ml-1 whitespace-pre-line">
@@ -306,11 +321,15 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
           <>
             <>
               {episode.work && (
-                <input type="hidden" name="work_id" value={episode.work.id} />
+                <input
+                  type="hidden"
+                  name="work_id"
+                  value={episode.work.id || ""}
+                />
               )}
             </>
-            <input type="hidden" name="episode_id" value={episode.id} />
-            <input type="hidden" name="reply_to" value={replyTo} />
+            <input type="hidden" name="episode_id" value={episode.id || ""} />
+            <input type="hidden" name="reply_to" value={replyTo || ""} />
           </>
           <>
             {replyTo && (

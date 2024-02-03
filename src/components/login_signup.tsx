@@ -1,6 +1,6 @@
 "use client";
 
-import { signUp } from "@/utils/actions";
+import { setupAccount } from "@/utils/actions";
 import { redirect, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useFormState } from "react-dom";
@@ -9,21 +9,23 @@ type FormType = "login" | "signup";
 const initialState = { message: "" };
 
 const LoginSignup = () => {
-  const [state, action] = useFormState(signUp, initialState);
+  const params = useSearchParams();
+  const query = params.get("form");
+  const formType: FormType = (query as FormType) || "login";
+  const loginAndSignUp = setupAccount.bind(null, formType);
+  const [state, action] = useFormState(loginAndSignUp, initialState);
   const [loginOrSigup, setLoginOrSignup] = useState<FormType>("login");
   const [showPassword, setShowPassword] = useState(false);
-
   const router = useRouter();
-
-  const params = useSearchParams();
-  console.log("params", params.toString());
 
   if (!params.toString()) {
     redirect("/account?form=login");
   }
+  if (state.message === "success") {
+    redirect("/mypage");
+  }
 
   useEffect(() => {
-    const query = params.get("form");
     if (query === "login") {
       setLoginOrSignup("login");
     } else if (query === "signup") {
@@ -51,7 +53,7 @@ const LoginSignup = () => {
   console.log("state", state);
 
   return (
-    <div className="fixed flex justify-center w-full h-[calc(100%-300px)]">
+    <div className="flex justify-center w-full h-[calc(100%-300px)]">
       <div className="relative w-[400px] sm:w-[500px] md:w-[600px] lg:w-[800px]">
         <form action={action}>
           <div className="flex flex-col gap-7 m-5">
