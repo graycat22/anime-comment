@@ -20,11 +20,10 @@
 "use client";
 
 import { SessionContext } from "@/components/providers";
-import { supabase_br } from "@/utils/supabase-cs";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 
 const MypageLayout = ({ children }: { children: React.ReactNode }) => {
-  const { session, setSession } = useContext(SessionContext);
+  const { session } = useContext(SessionContext);
   return (
     <div>
       {children} {session ? "ログイン中" : "ログアウトしました"}

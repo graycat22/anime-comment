@@ -46,7 +46,7 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
     fetchData();
   }, []);
 
-  console.log(episode);
+  console.log("episode", episode);
   console.log("state", state);
 
   //* コメントを取得する
@@ -58,7 +58,7 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
         .select()
         .eq("episode_id", params.episode_id);
       if (error) return console.log(error);
-      console.log(data);
+      console.log("comments", data);
       setReplyTo("");
       setComments(data);
     };

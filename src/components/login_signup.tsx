@@ -2,13 +2,16 @@
 
 import { setupAccount } from "@/utils/actions";
 import { redirect, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useFormState } from "react-dom";
+import { SessionContext } from "./providers";
+import { supabase_br } from "@/utils/supabase-cs";
 
 type FormType = "login" | "signup";
 const initialState = { message: "" };
 
 const LoginSignup = () => {
+  const { session, setSession } = useContext(SessionContext);
   const params = useSearchParams();
   const query = params.get("form");
   const formType: FormType = (query as FormType) || "login";
@@ -18,10 +21,11 @@ const LoginSignup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
+  console.log("session mypage", session);
+
   if (!params.toString()) {
     redirect("/account?form=login");
-  }
-  if (state.message === "success") {
+  } else if (session) {
     redirect("/mypage");
   }
 
@@ -34,6 +38,18 @@ const LoginSignup = () => {
       redirect("/account?form=login");
     }
   }, []);
+
+  // ログイン成功したらマイページへ飛ばす
+  useEffect(() => {
+    if (state.message === "success") {
+      const getSessionData = async () => {
+        const { data, error } = await supabase_br.auth.getSession();
+        setSession(data.session);
+      };
+
+      getSessionData();
+    }
+  }, [state.message]);
 
   const toggleShowPassword = () => {
     setShowPassword((prev) => !prev);
@@ -50,7 +66,7 @@ const LoginSignup = () => {
     }
   };
 
-  console.log("state", state);
+  console.log("state", state.message);
 
   return (
     <div className="flex justify-center w-full h-[calc(100%-300px)]">
