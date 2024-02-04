@@ -3,22 +3,22 @@
 import { deleteComment } from "@/utils/actions";
 
 const DeleteDialog = ({
-  id,
+  comment,
   isOpen,
   onClose,
   revalidate,
 }: {
-  id: string;
+  comment: any;
   isOpen: boolean;
   onClose: () => void;
   revalidate: () => void;
 }) => {
   const handleClickYes = () => {
-    deleteComment(id);
+    deleteComment(comment.id);
     setTimeout(() => {
       revalidate();
       onClose();
-    }, 500);
+    }, 100);
   };
 
   return (

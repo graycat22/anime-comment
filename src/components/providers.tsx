@@ -1,7 +1,8 @@
 "use client";
 
+import { supabase_br } from "@/utils/supabase-cs";
 import { Session } from "@supabase/supabase-js";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 
 //? 始祖のプロバイダ //////////////////////////////////////////////////
 const Providers = ({ children }: { children: React.ReactNode }) => {
@@ -27,6 +28,23 @@ export const SessionProvider = ({
   children: React.ReactNode;
 }) => {
   const [session, setSession] = useState<Session | null>(null);
+
+  useEffect(() => {
+    const subscription = supabase_br.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "SIGNED_OUT") {
+          setSession(null);
+        } else if (session) {
+          setSession(session);
+        }
+      }
+    );
+
+    return () => {
+      subscription.data.subscription.unsubscribe();
+    };
+  }, []);
+
   return (
     <SessionContext.Provider value={{ session, setSession }}>
       {children}

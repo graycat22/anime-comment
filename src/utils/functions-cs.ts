@@ -83,6 +83,3 @@ export const convertToJST = (isoString: string) => {
 
   return jpDate.toString();
 };
-
-const created_at = "2024-02-02T17:15:32.680141+00:00";
-const convertedDate = convertToJST(created_at);

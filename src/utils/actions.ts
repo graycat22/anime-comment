@@ -10,6 +10,8 @@ export const postComment = async (
   currentState: CommentType,
   formData: FormData
 ): Promise<CommentType> => {
+  const userId = formData.get("user_id");
+  const userName = formData.get("user_name");
   const content = formData.get("content");
   const workId = formData.get("work_id");
   const episodeId = formData.get("episode_id");
@@ -24,15 +26,18 @@ export const postComment = async (
 
   const supabase = await supabase_sa();
   const { error } = await supabase.from("Comments").insert({
-    user: "あなた",
+    user_id: userId,
+    user_name: userName,
     content: content.toString().trim(),
     summary: "",
     work_id: workId,
     episode_id: episodeId,
     reply_to: replyTo,
   });
+
   if (error) {
-    throw new Error("Content is missing");
+    console.log(error);
+    return { message: "failed" };
   } else {
     return { message: `success${generateRandomNumber()}` };
   }

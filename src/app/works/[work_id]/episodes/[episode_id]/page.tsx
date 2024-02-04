@@ -1,29 +1,32 @@
 "use client";
 
 import DeleteDialog from "@/components/delete_dialog";
+import FormButton from "@/components/form_button";
+import { SessionContext } from "@/components/providers";
 import { postComment } from "@/utils/actions";
 import {
   access_token,
   convertToJST,
-  generateRandomNumber,
   pressKeyDown,
   resizeTextarea,
 } from "@/utils/functions-cs";
 import { supabase_br } from "@/utils/supabase-cs";
-import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useFormState } from "react-dom";
 
 const initialState = { message: "" };
 
 const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
   const [state, action] = useFormState(postComment, initialState);
+  const { session } = useContext(SessionContext);
   const [episode, setEpisode] = useState<any>([]);
   const [stickyBar, setStickyBar] = useState<boolean>(false);
   const [comments, setComments] = useState<any>([]);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
   const [replyTo, setReplyTo] = useState<string>("");
-  const [deleteId, setDeleteId] = useState<string>("");
-  const [isRevalidate, setIsRevalidate] = useState<number>(0);
+  const [deleteComment, setDeleteComment] = useState<any>([]);
+  const [isRevalidate, setIsRevalidate] = useState<string>("");
   // 直接 DOM 操作
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -63,7 +66,7 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
     fetchComment();
 
     if (state.message) {
-      const timeout = setTimeout(() => {
+      setTimeout(() => {
         if (textareaRef.current) {
           textareaRef.current.value = "";
           const element = document.documentElement;
@@ -73,12 +76,11 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
             behavior: "smooth",
           });
         }
-      }, 100);
+      }, 300);
 
       resize();
-      return () => clearTimeout(timeout);
     }
-  }, [state.message, isRevalidate]);
+  }, [state.message]);
 
   // 送信したら最下部へスクロール
   useEffect(() => {
@@ -107,9 +109,17 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
     };
   }, []);
 
+  // 疑似的に要素を削除(hiddenに)する
+  useEffect(() => {
+    const elementToRemove = document.getElementById(isRevalidate.slice(0, 8));
+    if (elementToRemove) {
+      elementToRemove.style.display = "none";
+    }
+  }, [isRevalidate]);
+
   const clickDeleteButton = (commentId: string) => {
     setOpenDeleteDialog(!openDeleteDialog);
-    setDeleteId(commentId);
+    setDeleteComment(commentId);
   };
 
   const clickReplyButton = (replyId: string) => {
@@ -135,8 +145,6 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
     handleScrollToComment(commentId);
     setReplyTo(commentId);
   };
-
-  console.log("revalidate", isRevalidate);
 
   return (
     <div>
@@ -176,7 +184,7 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
 
       <div className="flex flex-col mx-auto sm:w-4/5 md:w-2/3 lg:w-1/2">
         <div className="mx-3 mb-[72px]">
-          {comments.map((comment: any, index: number) => {
+          {comments.sort(compareFunction).map((comment: any, index: number) => {
             const contentHeight = comment.content.split("\n").length;
             return (
               <div
@@ -199,15 +207,20 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
                             onClick={() => clickReplyId(comment.reply_to)}
                             className="cursor-pointer hover:text-red-400"
                           >
-                            ID: {comment.reply_to.slice(0, 8)} ⇐ &nbsp;{" "}
+                            ID: {comment.reply_to.slice(0, 8)} ⇐ &nbsp;
                           </p>
                         )}
                         <p>ID: {comment.id.slice(0, 8)}</p>
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <p>{convertToJST(comment.created_at)}</p>
-                      <p>{comment.user}</p>
+                      <p className="text-sm my-auto">
+                        {comment.created_at.slice(0, 10).replace(/-/g, "/")},
+                        {convertToJST(comment.created_at).slice(15, 21)}
+                      </p>
+                      <Link href={`/${comment.user_id.slice(0, 8)}`}>
+                        {comment.user_name}
+                      </Link>
                     </div>
                   </div>
                   <div className="flex mb-2.5">
@@ -257,9 +270,9 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
                             </>
                           </div>
                           <>
-                            {comment.user === "あなた" ? (
+                            {comment.user_id === session?.user.id ? (
                               <button
-                                onClick={() => clickDeleteButton(comment.id)}
+                                onClick={() => clickDeleteButton(comment)}
                                 className="w-5"
                               >
                                 <svg
@@ -328,6 +341,16 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
                 />
               )}
             </>
+            <input
+              type="hidden"
+              name="user_id"
+              value={session?.user.id || ""}
+            />
+            <input
+              type="hidden"
+              name="user_name"
+              value={session?.user.user_metadata.display_name || ""}
+            />
             <input type="hidden" name="episode_id" value={episode.id || ""} />
             <input type="hidden" name="reply_to" value={replyTo || ""} />
           </>
@@ -341,27 +364,16 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
               </span>
             )}
           </>
-          <button
-            id="submitButton"
-            type="submit"
-            className="w-6 mt-3 mx-3 py-auto transition-transform transform hover:translate-y-1"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-              <path
-                fill="rgb(252 105 105)"
-                d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480V396.4c0-4 1.5-7.8 4.2-10.7L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"
-              />
-            </svg>
-          </button>
+          <FormButton />
         </form>
       </div>
       <>
         {openDeleteDialog && (
           <DeleteDialog
-            id={deleteId}
+            comment={deleteComment}
             isOpen={openDeleteDialog}
             onClose={() => setOpenDeleteDialog(false)}
-            revalidate={() => setIsRevalidate(generateRandomNumber())}
+            revalidate={() => setIsRevalidate(deleteComment.id)}
           />
         )}
       </>
@@ -374,4 +386,12 @@ export default EpisodeComment;
 const resize = () => {
   const $textarea = document.getElementById("textarea") as HTMLTextAreaElement;
   $textarea.style.height = "50px";
+};
+
+const compareFunction = (a: any, b: any) => {
+  const dateA = new Date(a.created_at);
+  const dateB = new Date(b.created_at);
+
+  // 降順にするため、b - aとしています
+  return dateA.getTime() - dateB.getTime();
 };
