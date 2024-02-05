@@ -6,6 +6,7 @@ import { SessionContext } from "@/components/providers";
 import { postComment } from "@/utils/actions";
 import {
   access_token,
+  compareFunction,
   convertToJST,
   pressKeyDown,
   resizeTextarea,
@@ -34,6 +35,7 @@ const EpisodeComment = ({
   // 直接 DOM 操作
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // エピソードを取得
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -377,7 +379,7 @@ const EpisodeComment = ({
             onInput={() => resizeTextarea("textarea")}
             onKeyDown={pressKeyDown}
             placeholder="コメントする…"
-            className="w-full border-b-2 border-red-300 mt-3 mb-2 resize-none focus:outline-none bg-slate-200"
+            className="w-full rounded-none border-b-2 border-slate-600 mt-3 mb-2 resize-none focus:outline-none bg-slate-200"
           />
           <>
             <>
@@ -434,12 +436,4 @@ export default EpisodeComment;
 const resize = () => {
   const $textarea = document.getElementById("textarea") as HTMLTextAreaElement;
   $textarea.style.height = "50px";
-};
-
-const compareFunction = (a: any, b: any) => {
-  const dateA = new Date(a.created_at);
-  const dateB = new Date(b.created_at);
-
-  // 降順にするため、b - aとしています
-  return dateA.getTime() - dateB.getTime();
 };

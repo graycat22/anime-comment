@@ -1,20 +1,30 @@
 "use client";
 
-import { access_token, recursiveGetWorks } from "@/utils/functions-cs";
+import {
+  access_token,
+  compareFunction,
+  findLatestObject,
+  recursiveGetWorks,
+} from "@/utils/functions-cs";
 import { StatusType } from "@/utils/type";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
+import { SessionContext } from "./providers";
+import { supabase_br } from "@/utils/supabase-cs";
 
 const ThreadsList = () => {
+  const { session } = useContext(SessionContext);
   const [allAnime, setAllAnime] = useState<any[]>([]);
   const [currentAllAnime, setCurrentAllAnime] = useState<any[]>([]);
   const [animeStatus, setAnimeStatus] = useState<StatusType>();
+  const [latestData, setLatestData] = useState<any>([]);
   const topRef = useRef<HTMLDivElement>(null);
 
   //? process.envはおそらくサーバーサイドでのみ使用可能
   // console.log("console", process.env.ANNICT_TOKEN)
 
+  // Annictから自分のアニメ情報を全て引っ張ってくる
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -29,11 +39,92 @@ const ThreadsList = () => {
           sessionStorage.setItem("allAnime", JSON.stringify(works));
         }
       } catch (error) {
-        console.log("エラーが発生しました", error);
+        console.log(
+          "Annictから自分のアニメ情報を全て引っ張ってくる途中にエラーが発生しました",
+          error
+        );
       }
     };
     fetchData();
   }, []);
+
+  //? データベースから最近更新したスレッドを15件取得 //////////////////////////////////
+  useEffect(() => {
+    const fetchThreads = async () => {
+      //* まずは50コメント取得する /////////////////////////////////////
+      let threads: any[] | null = null;
+
+      if (session) {
+        const { data } = await supabase_br
+          .from("Comments")
+          .select()
+          .eq("user_id", session?.user.id)
+          .range(0, 10);
+        console.log("session?.user.id", threads);
+        threads = data;
+      } else {
+        const { data } = await supabase_br
+          .from("Comments")
+          .select()
+          .range(0, 100);
+        console.log("threads", threads);
+        threads = data;
+      }
+
+      //* 最近コメントした投稿 /////////////////////////////////////////
+      const latestThread = threads?.map((comment) => ({
+        work_id: comment.work_id,
+        episode_id: comment.episode_id,
+        created_at: comment.created_at,
+      }));
+      console.log("latestThread", latestThread);
+
+      //* 同じエピソードIDの作品を最大15件探す ///////////////////////////
+      const sameEpisodeId = Array.from(
+        new Set(latestThread?.map((item) => item.episode_id))
+      )
+        .map((episodeId) => ({
+          episode_id: episodeId,
+          works: latestThread?.filter((item) => item.episode_id === episodeId),
+          count: latestThread?.filter((item) => item.episode_id === episodeId)
+            .length,
+          created_at: findLatestObject(
+            latestThread?.filter((item) => item.episode_id === episodeId)
+          ).created_at,
+        }))
+        .slice(0, 14);
+      console.log("sameEpisodeId", sameEpisodeId);
+
+      //* Annict に何期何話かをフェッチする ///////////////////////////////
+      const res =
+        await fetch(`https://api.annict.com/v1/episodes?access_token=${access_token}&filter_ids=${sameEpisodeId
+          .map((item) => item.episode_id)
+          .join(",")}
+          `);
+      const anime = await res.json();
+      console.log("episodes", anime.episodes);
+
+      //* annict 得られた anime からアニメ名と何話かをプロパティに付ける /////
+      const hotThreads = sameEpisodeId.map((episode) => {
+        const correspondingAnime = anime.episodes.find(
+          (item: any) => item.id === Number(episode.episode_id)
+        );
+        if (correspondingAnime) {
+          return {
+            ...episode,
+            work_title: correspondingAnime.work.title,
+            episode_title: correspondingAnime.title,
+            number: correspondingAnime.number_text,
+          };
+        }
+      });
+      console.log("hotThreads", hotThreads);
+
+      setLatestData(hotThreads);
+    };
+
+    fetchThreads();
+  }, [session]);
 
   const handleClickStatus = (status: StatusType) => {
     if (status === animeStatus) {
@@ -75,26 +166,36 @@ const ThreadsList = () => {
     }
   };
 
-  const hotThreads = [
-    { title: "アナザーコード", episode: "3期2話", number: 10 },
-    { title: "パルワールド", episode: "1期1話", number: 3 },
-    { title: "私の幸福資本論", episode: "10期24話", number: 2 },
-  ];
-
   return (
     <>
       <div ref={topRef} className="flex">
-        <div className="w-1/3 lg:w-[25%] mx-auto">
-          <div className="m-4 p-2 border-2 rounded-md flex justify-center">
+        <div className="w-1/3 lg:w-[25%] mx-auto text-sm">
+          <div className="sm:hidden m-4 p-2 border-2 rounded-md flex justify-center">
+            HOT
+          </div>
+          <div className="hidden m-4 p-2 border-2 rounded-md sm:flex justify-center">
             ホットなスレッド
           </div>
-          {hotThreads.map((thread, index) => (
-            <div key={index} className="m-5 pb-5 border-b-2">
-              <h3>{thread.title}</h3>
-              <p>{thread.episode}</p>
-              <p>( {thread.number} コメント)</p>
-            </div>
-          ))}
+          {latestData
+            .sort(compareFunction)
+            .reverse()
+            .map((thread: any, index: number) => (
+              <Link
+                href={`/works/${thread.works[0].work_id}/episodes/${thread.episode_id}`}
+                key={index}
+                className="relative block ml-3 sm:m-5 py-2 border-b-2"
+              >
+                <h3>{thread.work_title}</h3>
+                <p>{thread.episode_title}</p>
+                <p className="text-center">{thread.number}</p>
+                <p className="absolute bottom-[6px] -left-1 text-[11px] text-yellow-600/90">
+                  {index === 0 && thread.count && "最新♪"}
+                </p>
+                <p className="text-xs text-right mt-1">
+                  ( {thread.count} コメ)
+                </p>
+              </Link>
+            ))}
         </div>
 
         <div className="mx-auto lg:w-[50%] relative pb-8">
@@ -296,3 +397,17 @@ const ThreadsList = () => {
 };
 
 export default ThreadsList;
+
+function removeSymbolsAfterFirstOccurrence(inputString: string) {
+  const index = inputString.search(/[^\w\s]/); // 最初の記号の位置を検索
+
+  if (index !== -1) {
+    const resultString = inputString.substring(0, index).trim(); // 記号以前の部分を抽出してトリム
+    console.log(resultString);
+    return resultString;
+  }
+
+  // 記号が見つからない場合は元の文字列を返す
+  console.log(inputString);
+  return inputString;
+}

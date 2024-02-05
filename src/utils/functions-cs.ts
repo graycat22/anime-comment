@@ -72,7 +72,7 @@ export const resizeTextarea = (id: string) => {
   }
 };
 
-//　timezonestamp を JST に変換する関数
+// timezonestamp を JST に変換する関数
 export const convertToJST = (isoString: string) => {
   const date = new Date(isoString);
 
@@ -82,4 +82,33 @@ export const convertToJST = (isoString: string) => {
   );
 
   return jpDate.toString();
+};
+
+// 作成時間を昇順にして並び替えるための関数
+// 使い方は Array.sort(compareFunction) の Aeeay に任意のオブジェクト配列を入れる
+export const compareFunction = (a: any, b: any) => {
+  const dateA = new Date(a.created_at);
+  const dateB = new Date(b.created_at);
+
+  // 昇順にするため、b - としています
+  return dateA.getTime() - dateB.getTime();
+};
+
+// オブジェクト配列から created_at プロパティを比較し、一番新しい日時のオブジェクトを取り出す関数
+export const findLatestObject = (objects: any) => {
+  if (objects.length === 0) {
+    return null; // 配列が空の場合はnullを返すか、適切なデフォルト値を返すことができます
+  }
+
+  // 最初のオブジェクトを初期値として設定
+  let latestObject = objects[0];
+
+  // 各オブジェクトのcreated_atを比較して最新のものを更新
+  for (const obj of objects) {
+    if (obj.created_at > latestObject.created_at) {
+      latestObject = obj;
+    }
+  }
+
+  return latestObject;
 };

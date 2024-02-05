@@ -4,7 +4,7 @@ import { setupAccount } from "@/utils/actions";
 import { redirect, useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import { useFormState } from "react-dom";
-import { SessionContext } from "./providers";
+import { SessionContext } from "../../components/providers";
 import { supabase_br } from "@/utils/supabase-cs";
 
 type FormType = "login" | "signup";
@@ -26,7 +26,7 @@ const LoginSignup = () => {
   if (!params.toString()) {
     redirect("/account?form=login");
   } else if (session) {
-    redirect("/mypage");
+    router.back();
   }
 
   useEffect(() => {

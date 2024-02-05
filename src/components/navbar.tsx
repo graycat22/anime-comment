@@ -142,7 +142,7 @@ const Navibar = ({ color }: { color: string }) => {
                       variant="text"
                       size="sm"
                       placeholder=""
-                      className="hidden w-24 text-stone-900 bg-gray-200 rounded-md lg:inline-block"
+                      className="hidden w-24 text-md text-stone-900 bg-gray-200 rounded-md lg:inline-block"
                     >
                       <span>ログイン</span>
                     </Button>
@@ -152,7 +152,7 @@ const Navibar = ({ color }: { color: string }) => {
                       variant="gradient"
                       size="sm"
                       placeholder=""
-                      className="hidden w-[120px] text-stone-900 bg-gray-200 rounded-md lg:inline-block"
+                      className="hidden w-[120px] text-md text-stone-900 bg-gray-200 rounded-md lg:inline-block"
                     >
                       <span>サインアップ</span>
                     </Button>
@@ -200,30 +200,54 @@ const Navibar = ({ color }: { color: string }) => {
           <nav className="duration-500 ease-in-out">
             <div className="container mx-auto">
               {navList}
-              <div className="flex items-center gap-x-2 mx-2">
-                <Link href="/account?form=login" className="w-full">
-                  <Button
-                    className="w-full border-2 rounded-md text-stone-900"
-                    fullWidth
-                    variant="text"
-                    size="sm"
-                    placeholder=""
-                  >
-                    <span>ログイン</span>
-                  </Button>
-                </Link>
-                <Link href="/account?form=signup" className="w-full">
-                  <Button
-                    className="w-full border-2 rounded-md text-stone-900"
-                    fullWidth
-                    variant="text"
-                    size="sm"
-                    placeholder=""
-                  >
-                    <span>サインアップ</span>
-                  </Button>
-                </Link>
-              </div>
+              {session ? (
+                <>
+                  <div className="flex items-center gap-x-2 mx-2">
+                    <>
+                      <Link href="/mypage" className="w-full">
+                        <Button
+                          className="w-full border-2 rounded-md text-stone-900"
+                          fullWidth
+                          variant="text"
+                          size="sm"
+                          placeholder=""
+                        >
+                          <span>マイページ</span>
+                        </Button>
+                      </Link>
+                    </>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-x-2 mx-2">
+                    <>
+                      <Link href="/account?form=login" className="w-full">
+                        <Button
+                          className="w-full border-2 rounded-md text-stone-900"
+                          fullWidth
+                          variant="text"
+                          size="sm"
+                          placeholder=""
+                        >
+                          <span>ログイン</span>
+                        </Button>
+                      </Link>
+                      <Link href="/account?form=signup" className="w-full">
+                        <Button
+                          className="w-full border-2 rounded-md text-stone-900"
+                          fullWidth
+                          variant="text"
+                          size="sm"
+                          placeholder=""
+                        >
+                          <span>サインアップ</span>
+                        </Button>
+                      </Link>
+                    </>
+                  </div>
+                </>
+              )}
             </div>
           </nav>
         )}

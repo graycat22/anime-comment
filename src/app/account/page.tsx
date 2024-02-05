@@ -1,4 +1,4 @@
-import LoginSignup from "@/components/login_signup";
+import LoginSignup from "@/app/account/login_signup";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";

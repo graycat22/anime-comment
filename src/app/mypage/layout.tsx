@@ -20,15 +20,21 @@
 "use client";
 
 import { SessionContext } from "@/components/providers";
+import { redirect } from "next/navigation";
 import { useContext } from "react";
 
 const MypageLayout = ({ children }: { children: React.ReactNode }) => {
   const { session } = useContext(SessionContext);
-  return (
-    <div>
-      {children} {session ? "ログイン中" : "ログアウトしました"}
-    </div>
-  );
+
+  if (session) {
+    return (
+      <div>
+        {children} {session ? "ログイン中" : "ログアウトしました"}
+      </div>
+    );
+  } else {
+    redirect("/account?=login");
+  }
 };
 
 export default MypageLayout;
