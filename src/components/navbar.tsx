@@ -51,11 +51,11 @@ const Navibar = ({ color }: { color: string }) => {
         className="flex items-center gap-x-2 p-1 font-medium"
         placeholder=""
       >
-        <a href="#" className="flex items-center text-stone-900">
-          過去ログ
+        <a href="/works" className="flex items-center text-stone-900">
+          全作品一覧
         </a>
       </Typography>
-      {/* <Typography
+      <Typography
         as="li"
         variant="h2"
         color="blue-gray"
@@ -65,7 +65,7 @@ const Navibar = ({ color }: { color: string }) => {
         <a href="#" className="flex items-center text-stone-900">
           ♨️スレッド
         </a>
-      </Typography> */}
+      </Typography>
     </ul>
   );
 
@@ -78,7 +78,7 @@ const Navibar = ({ color }: { color: string }) => {
   };
   return (
     <div id="navibar">
-      <Navbar className="mx-auto py-2 lg:py-4" placeholder="">
+      <Navbar className="mx-auto py-2 lg:py-4 border-none" placeholder="">
         <div
           className="container mx-auto flex items-center justify-between text-blue-gray-900 cursor-pointer lg:cursor-default"
           onClick={handleOpenNav}

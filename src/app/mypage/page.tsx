@@ -2,6 +2,7 @@
 
 import Navibar from "@/components/navbar";
 import { signOut } from "@/utils/supabase-cs";
+import UserInfoForm from "./user-info-form";
 
 const Mypage = () => {
   return (
@@ -13,6 +14,7 @@ const Mypage = () => {
       >
         ログアウト
       </button>
+      <UserInfoForm />
     </main>
   );
 };

@@ -3,6 +3,7 @@
 import {
   access_token,
   compareFunction,
+  countSameIds,
   findLatestObject,
   recursiveGetWorks,
 } from "@/utils/functions-cs";
@@ -19,6 +20,9 @@ const ThreadsList = () => {
   const [currentAllAnime, setCurrentAllAnime] = useState<any[]>([]);
   const [animeStatus, setAnimeStatus] = useState<StatusType>();
   const [latestData, setLatestData] = useState<any>([]);
+  const [numberOfComments, setNumberOfComments] = useState<
+    { work_id: number; number: number }[]
+  >([]);
   const topRef = useRef<HTMLDivElement>(null);
 
   //? process.envはおそらくサーバーサイドでのみ使用可能
@@ -126,6 +130,23 @@ const ThreadsList = () => {
     fetchThreads();
   }, [session]);
 
+  //? 作品の ID がゲット出来たら、コメントを取得する /////////////////////////
+  useEffect(() => {
+    const fetchNumber = async () => {
+      const { data, error } = await supabase_br
+        .from("Comments")
+        .select("work_id");
+      if (error) {
+        return console.log(`${error}というエラーが起きました`);
+      }
+      console.log("*, counts", data, countSameIds(data));
+      setNumberOfComments(countSameIds(data));
+    };
+
+    fetchNumber();
+  }, [allAnime]);
+
+  //? ------------------------------------------------------------------------
   const handleClickStatus = (status: StatusType) => {
     if (status === animeStatus) {
       setAnimeStatus(undefined);
@@ -170,32 +191,46 @@ const ThreadsList = () => {
     <>
       <div ref={topRef} className="flex">
         <div className="w-1/3 lg:w-[25%] mx-auto text-sm">
-          <div className="sm:hidden m-4 p-2 border-2 rounded-md flex justify-center">
-            HOT
+          <div className="ml-2">
+            <div className="sm:hidden m-4 p-2 border-2 rounded-md flex justify-center">
+              HOT
+            </div>
+            <div className="hidden m-4 p-2 border-2 rounded-md sm:flex justify-center">
+              {session ? "最近" : "ホットなスレッド"}
+            </div>
           </div>
-          <div className="hidden m-4 p-2 border-2 rounded-md sm:flex justify-center">
-            ホットなスレッド
-          </div>
-          {latestData
-            .sort(compareFunction)
-            .reverse()
-            .map((thread: any, index: number) => (
-              <Link
-                href={`/works/${thread.works[0].work_id}/episodes/${thread.episode_id}`}
-                key={index}
-                className="relative block ml-3 sm:m-5 py-2 border-b-2"
-              >
-                <h3>{thread.work_title}</h3>
-                <p>{thread.episode_title}</p>
-                <p className="text-center">{thread.number}</p>
-                <p className="absolute bottom-[6px] -left-1 text-[11px] text-yellow-600/90">
-                  {index === 0 && thread.count && "最新♪"}
-                </p>
-                <p className="text-xs text-right mt-1">
-                  ( {thread.count} コメ)
-                </p>
-              </Link>
-            ))}
+          <>
+            {latestData
+              .sort(compareFunction)
+              .reverse()
+              .map((thread: any, index: number) => (
+                <Link
+                  href={`#`}
+                  key={index}
+                  className="relative block group ml-3 sm:m-5 py-2"
+                >
+                  <h3 className="pl-3 border-r-2 border-b-2 rounded-lg border-red-300 duration-300 sm:group-hover:pl-12 md:group-hover:pl-16 lg:group-hover:pl-20 group-hover:bg-red-200 group-hover:border-red-200">
+                    {thread.work_title}
+                  </h3>
+                  <div className="flex justify-center duration-150 text-center">
+                    <p className="w-fit px-1 rounded-b-md bg-red-300 border-b-2 border-red-300 text-white font-semibold duration-100 group-hover:text-[12px]">
+                      {thread.number}
+                    </p>
+                  </div>
+                  <div className="flex mt-1">
+                    <p className="ml-1 items-start text-gray-500/90">: :</p>
+                    <span className="left-5">{thread.episode_title}</span>
+                  </div>
+                  <p className="absolute bottom-[6px] -left-1 text-[11px] text-yellow-600/90">
+                    {index === 0 && thread.count && "最新♪"}
+                  </p>
+                  <p className="text-xs text-right mt-1">
+                    ( {thread.count} コメ)
+                  </p>
+                  <span className="absolute bottom-0 -left-7 -z-10 w-16 h-16 rounded-full bg-transparent group-hover:bg-gray-200 group-hover:left-12 duration-500"></span>
+                </Link>
+              ))}
+          </>
         </div>
 
         <div className="mx-auto lg:w-[50%] relative pb-8">
@@ -293,10 +328,10 @@ const ThreadsList = () => {
 
           {currentAllAnime.map((anime, index) => (
             <div key={index} className="flex justify-center duration-200">
-              <div className="px-1 rounded-sm duration-200 hover:bg-red-300/40">
+              <div className="px-1 rounded-3xl duration-200 hover:bg-red-300 outline-dotted outline-transparent outline-offset-1 hover:outline-red-300">
                 <Link
-                  href={`/works/${anime.id}`}
-                  className="flex justify-center mx-3 my-5 cursor-pointer"
+                  href={`/works/${anime.id}/episodes`}
+                  className="flex justify-center mx-3 my-4 cursor-pointer"
                 >
                   <div className="relative flex">
                     {anime.images ? (
@@ -305,7 +340,7 @@ const ThreadsList = () => {
                         height={200}
                         alt=""
                         src="/pokemon.png"
-                        className="ring-2 ring-[#eC7871] rounded-sm"
+                        className="ring-2 ring-red-300 rounded-sm"
                       />
                     ) : (
                       <div className="flex relative w-[300px] h-[168px] bg-stone-400/80 ring-2 ring-[#6C7871] rounded-sm">
@@ -321,8 +356,12 @@ const ThreadsList = () => {
                       {anime.title}
                     </p>
                     <div className="relative flex flex-col md:w-[250px] lg:w-[350px] h-full">
-                      <p className="hidden md:inline-block px-3">
-                        ( XX コメント)
+                      <p className="hidden md:inline-block px-3 text-red-500">
+                        ({" "}
+                        {numberOfComments.find(
+                          (item) => item.work_id === anime.id
+                        )?.number || 0}{" "}
+                        コメント)
                       </p>
                       <p className="hidden md:inline-block px-3">
                         全 {anime.episodes_count} 話
@@ -397,17 +436,3 @@ const ThreadsList = () => {
 };
 
 export default ThreadsList;
-
-function removeSymbolsAfterFirstOccurrence(inputString: string) {
-  const index = inputString.search(/[^\w\s]/); // 最初の記号の位置を検索
-
-  if (index !== -1) {
-    const resultString = inputString.substring(0, index).trim(); // 記号以前の部分を抽出してトリム
-    console.log(resultString);
-    return resultString;
-  }
-
-  // 記号が見つからない場合は元の文字列を返す
-  console.log(inputString);
-  return inputString;
-}

@@ -184,7 +184,7 @@ const EpisodeComment = ({
             )}
           </>
           <>
-            <Link href={`/works/${params.work_id}`}>
+            <Link href={`/works/${params.work_id}/episodes`}>
               <h1 className="my-4 text-lg">{episode.title}</h1>
             </Link>
           </>

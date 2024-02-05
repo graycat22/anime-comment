@@ -112,3 +112,25 @@ export const findLatestObject = (objects: any) => {
 
   return latestObject;
 };
+
+//* 同じidを持つ要素の数をカウントする関数 ////////////////////////////////
+export const countSameIds = (
+  array: { work_id: string }[]
+): { work_id: number; number: number }[] => {
+  // カウントを格納するオブジェクト
+  const countMap: Record<string, number> = {};
+
+  // 各要素のidをカウントする
+  array.forEach((item) => {
+    const id = item.work_id; // idのプロパティが適切な場合は修正が必要
+    countMap[id] = (countMap[id] || 0) + 1;
+  });
+
+  // カウント結果を元にオブジェクト配列を生成
+  const resultArray = Object.keys(countMap).map((id) => ({
+    work_id: Number(id),
+    number: countMap[id],
+  }));
+
+  return resultArray;
+};
