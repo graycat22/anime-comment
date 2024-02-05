@@ -17,7 +17,11 @@ import { useFormState } from "react-dom";
 
 const initialState = { message: "" };
 
-const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
+const EpisodeComment = ({
+  params,
+}: {
+  params: { episode_id: number; work_id: number };
+}) => {
   const [state, action] = useFormState(postComment, initialState);
   const { session } = useContext(SessionContext);
   const [episode, setEpisode] = useState<any>([]);
@@ -155,17 +159,55 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
       >
         <div className="flex justify-between mx-2 w-full">
           <>
-            <span className="cursor-pointer h-fit p-2 my-auto bg-slate-700/60 rounded-xl text-white">
-              前のエピソード
-            </span>
+            {episode.prev_episode ? (
+              <>
+                <Link
+                  href={`/works/${params.work_id}/episodes/${episode.prev_episode?.id}`}
+                  className="sm:hidden flex justify-center cursor-pointer w-12 h-fit p-2 pt-[6px] my-auto bg-slate-700/60 rounded-xl text-white"
+                >
+                  <span className="mr-[2px]">◁</span>
+                </Link>
+                <Link
+                  href={`/works/${params.work_id}/episodes/${episode.prev_episode?.id}`}
+                  className="hidden sm:inline-block cursor-pointer h-fit px-[6px] my-auto bg-slate-700/60 rounded-xl text-white"
+                >
+                  前のエピソード
+                </Link>
+              </>
+            ) : (
+              <>
+                <div className="sm:hidden flex justify-center cursor-pointer w-12 h-fit p-2 pt-[6px] my-auto rounded-xl"></div>
+                <div className="hidden sm:inline-block cursor-pointer w-32 h-fit p-2 my-auto bg-slate-700/60 rounded-xl text-white"></div>
+              </>
+            )}
           </>
           <>
-            <h1 className="my-4 text-lg">{episode.title}</h1>
+            <Link href={`/works/${params.work_id}`}>
+              <h1 className="my-4 text-lg">{episode.title}</h1>
+            </Link>
           </>
           <>
-            <span className="cursor-pointer h-fit p-2 my-auto bg-slate-700/60 rounded-xl text-white">
-              前のエピソード
-            </span>
+            {episode.next_episode ? (
+              <>
+                <Link
+                  href={`/works/${params.work_id}/episodes/${episode.next_episode.id}`}
+                  className="sm:hidden flex justify-center cursor-pointer w-12 h-fit p-2 pt-[6px] my-auto bg-slate-700/60 rounded-xl text-white"
+                >
+                  <span className="ml-[2px]">▷</span>
+                </Link>
+                <Link
+                  href={`/works/${params.work_id}/episodes/${episode.next_episode.id}`}
+                  className="hidden sm:inline-block cursor-pointer h-fit px-[6px] my-auto bg-slate-700/60 rounded-xl text-white"
+                >
+                  次のエピソード
+                </Link>
+              </>
+            ) : (
+              <>
+                <div className="sm:hidden flex justify-center cursor-pointer w-12 h-fit p-2 pt-[6px] my-auto rounded-xl"></div>
+                <div className="hidden sm:inline-block cursor-pointer w-32 h-fit p-2 my-auto bg-slate-700/60 rounded-xl text-white"></div>
+              </>
+            )}
           </>
         </div>
       </div>
@@ -195,10 +237,10 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
                 } ${replyTo === comment.id && "border-red-300"}`}
               >
                 <div className="w-full">
-                  <div className="flex justify-between">
-                    <div className="flex gap-2 items-center text-sm">
+                  <div className="flex justify-between text-xs">
+                    <div className="flex gap-2 items-center">
                       <div
-                        className={`flex ${
+                        className={`flex flex-col sm:flex-row ${
                           replyTo === comment.id && "text-red-500/90"
                         }`}
                       >
@@ -207,18 +249,24 @@ const EpisodeComment = ({ params }: { params: { episode_id: number } }) => {
                             onClick={() => clickReplyId(comment.reply_to)}
                             className="cursor-pointer hover:text-red-400"
                           >
-                            ID: {comment.reply_to.slice(0, 8)} ⇐ &nbsp;
+                            ID: {comment.reply_to.slice(0, 8)}&nbsp;
                           </p>
                         )}
-                        <p>ID: {comment.id.slice(0, 8)}</p>
+                        <p className="whitespace-nowrap">
+                          {comment.reply_to && " ⇐ "}ID:
+                          {comment.id.slice(0, 8)}
+                        </p>
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <p className="text-sm my-auto">
-                        {comment.created_at.slice(0, 10).replace(/-/g, "/")},
+                      <p className="my-auto">
+                        {comment.created_at.slice(2, 10).replace(/-/g, "/")}
                         {convertToJST(comment.created_at).slice(15, 21)}
                       </p>
-                      <Link href={`/${comment.user_id.slice(0, 8)}`}>
+                      <Link
+                        href={`/${comment.user_id.slice(0, 8)}`}
+                        className="text-sm"
+                      >
                         {comment.user_name}
                       </Link>
                     </div>
