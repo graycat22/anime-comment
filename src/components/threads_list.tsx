@@ -205,15 +205,15 @@ const ThreadsList = () => {
               .reverse()
               .map((thread: any, index: number) => (
                 <Link
-                  href={`#`}
+                  href={`/works/${thread.works[0].work_id}/episodes/${thread.episode_id}`}
                   key={index}
-                  className="relative block group ml-3 sm:m-5 py-2"
+                  className="relative block group mx-1 sm:m-5 py-2 border-y-2 sm:border-none rounded-t-lg"
                 >
                   <h3 className="pl-3 border-r-2 border-b-2 rounded-lg border-red-300 duration-300 sm:group-hover:pl-12 md:group-hover:pl-16 lg:group-hover:pl-20 group-hover:bg-red-200 group-hover:border-red-200">
                     {thread.work_title}
                   </h3>
                   <div className="flex justify-center duration-150 text-center">
-                    <p className="w-fit px-1 rounded-b-md bg-red-300 border-b-2 border-red-300 text-white font-semibold duration-100 group-hover:text-[12px]">
+                    <p className="w-fit px-1 rounded-b-md bg-red-300 border-b-2 border-red-300 text-white font-semibold">
                       {thread.number}
                     </p>
                   </div>
@@ -326,67 +326,70 @@ const ThreadsList = () => {
             </div>
           </div>
 
-          {currentAllAnime.map((anime, index) => (
-            <div key={index} className="flex justify-center duration-200">
-              <div className="px-1 rounded-3xl duration-200 hover:bg-red-300 outline-dotted outline-transparent outline-offset-1 hover:outline-red-300">
-                <Link
-                  href={`/works/${anime.id}/episodes`}
-                  className="flex justify-center mx-3 my-4 cursor-pointer"
-                >
-                  <div className="relative flex">
-                    {anime.images ? (
-                      <Image
-                        width={300}
-                        height={200}
-                        alt=""
-                        src="/pokemon.png"
-                        className="ring-2 ring-red-300 rounded-sm"
-                      />
-                    ) : (
-                      <div className="flex relative w-[300px] h-[168px] bg-stone-400/80 ring-2 ring-[#6C7871] rounded-sm">
-                        <p className="m-auto italic text-stone-100">N/A</p>
-                        <div className="absolute bottom-0 w-full flex justify-between px-1 text-sm">
-                          <p className="">ID: {anime.id}</p>
-                          <p className="">Status: {anime.status.kind}</p>
+          <>
+            {currentAllAnime.map((anime, index) => (
+              <div key={index} className="flex justify-center duration-200">
+                <div className="px-1 rounded-3xl duration-200 hover:bg-red-300 outline-dotted outline-transparent outline-offset-1 hover:outline-red-300">
+                  <Link
+                    href={`/works/${anime.id}/episodes`}
+                    className="flex justify-center mx-3 my-4 cursor-pointer"
+                  >
+                    <div className="relative flex">
+                      {anime.images ? (
+                        <Image
+                          width={300}
+                          height={200}
+                          alt=""
+                          src="/pokemon.png"
+                          className="ring-2 ring-red-300 rounded-sm"
+                        />
+                      ) : (
+                        <div className="flex relative w-[300px] h-[168px] bg-stone-400/80 ring-2 ring-[#6C7871] rounded-sm">
+                          <p className="m-auto italic text-stone-100">N/A</p>
+                          <div className="absolute bottom-0 w-full flex justify-between px-1 text-sm">
+                            <p className="">ID: {anime.id}</p>
+                            <p className="">Status: {anime.status.kind}</p>
+                          </div>
                         </div>
-                      </div>
-                    )}
-
-                    <p className="absolute top-0 left-0 w-full md:w-[300px] bg-opacity-75 bg-gray-800 p-2 text-white">
-                      {anime.title}
-                    </p>
-                    <div className="relative flex flex-col md:w-[250px] lg:w-[350px] h-full">
-                      <p className="hidden md:inline-block px-3 text-red-500">
-                        ({" "}
-                        {numberOfComments.find(
-                          (item) => item.work_id === anime.id
-                        )?.number || 0}{" "}
-                        コメント)
-                      </p>
-                      <p className="hidden md:inline-block px-3">
-                        全 {anime.episodes_count} 話
-                      </p>
-                      <p className="hidden md:inline-block px-3">
-                        放送時期 : {anime.season_name_text}
-                      </p>
-                      <p className="hidden md:inline-block absolute bottom-0 px-3">
-                        ID : {anime.id}
-                      </p>
-                      {!animeStatus && (
-                        <p className="hidden md:inline-block absolute bottom-0 right-0 px-3">
-                          {anime.status.kind === "watching" && "視聴中"}
-                          {anime.status.kind === "wanna_watch" && "見たい"}
-                          {anime.status.kind === "watched" && "見た"}
-                          {anime.status.kind === "stop_watching" && "視聴中止"}
-                          {anime.status.kind === "on_hold" && "一時中断"}
-                        </p>
                       )}
+
+                      <p className="absolute top-0 left-0 w-full md:w-[300px] bg-opacity-75 bg-gray-800 p-2 text-white">
+                        {anime.title}
+                      </p>
+                      <div className="relative flex flex-col md:w-[250px] lg:w-[350px] h-full">
+                        <p className="hidden md:inline-block px-3 text-red-500">
+                          ({" "}
+                          {numberOfComments.find(
+                            (item) => item.work_id === anime.id
+                          )?.number || 0}{" "}
+                          コメント)
+                        </p>
+                        <p className="hidden md:inline-block px-3">
+                          全 {anime.episodes_count} 話
+                        </p>
+                        <p className="hidden md:inline-block px-3">
+                          放送時期 : {anime.season_name_text}
+                        </p>
+                        <p className="hidden md:inline-block absolute bottom-0 px-3">
+                          ID : {anime.id}
+                        </p>
+                        {!animeStatus && (
+                          <p className="hidden md:inline-block absolute bottom-0 right-0 px-3">
+                            {anime.status.kind === "watching" && "視聴中"}
+                            {anime.status.kind === "wanna_watch" && "見たい"}
+                            {anime.status.kind === "watched" && "見た"}
+                            {anime.status.kind === "stop_watching" &&
+                              "視聴中止"}
+                            {anime.status.kind === "on_hold" && "一時中断"}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </>
 
           <div className="fixed bottom-3 left-3 z-10 flex gap-3 text-white">
             <div className="px-2 py-1 bg-[#ff7a7a]/80 rounded-md text-white">
